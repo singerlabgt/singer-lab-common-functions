@@ -1,4 +1,4 @@
-function [plot,lme] = LME_andplot(Table, Title, savepath, depvar, fixed_effects, random_effects, grouping, colors)
+function [plot,lme] = LME_andplot(Table, Title, savepath, depvar, fixed_effects, random_effects, grouping, colors, varargin)
 %Function for making dot + sem plots and LME stats, with annotation.
 %currently only functional for 2 total groups
 %inputs:
@@ -16,6 +16,9 @@ function [plot,lme] = LME_andplot(Table, Title, savepath, depvar, fixed_effects,
 %last 4 variables all need to be strings that match your column titles in
 %your table
 %colors is a cell array of the colors you want your different ave+error
+%varargin allows you to specify plotting order. must match your ind.
+%variable/group
+
 
 %stats
 formula = [depvar ' ~ ' fixed_effects ' + ' random_effects];
@@ -49,6 +52,14 @@ sd = stats.(['std_mean_' depvar]);
 
 tval = tinv(0.975, n - 1);
 stats.CI95 = tval .* (sd ./ sqrt(n));
+
+%setting plotting order
+if size(varargin,1) > 0
+if strcmp(varargin{1}, 'order')
+    [~, idx] = ismember(varargin{2}, stats.(fixed_effects));
+    stats = stats(idx, :);   % reorder rows
+end
+end
 
 %setting up plot
 x = 1:height(stats);  
